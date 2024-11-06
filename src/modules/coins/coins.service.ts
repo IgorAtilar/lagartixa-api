@@ -4,10 +4,10 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { catchError } from 'rxjs';
+import { catchError, firstValueFrom } from 'rxjs';
 import { CoinDTO } from './dto/coin.dto';
 import { ConfigService } from '@nestjs/config';
-import { COINS_TRENDING_MOCK } from './mock';
+import { TOP_COINS_MOCK } from './mock';
 
 @Injectable()
 export class CoinsService {
@@ -50,12 +50,33 @@ export class CoinsService {
       );
   }
 
+  private fetchCoinHistory(id: string) {
+    const url = this.buildUrl(`/coins/${id}/market_chart`, {
+      days: 7,
+      interval: 'daily',
+      vs_currency: 'usd',
+    });
+
+    return this.httpService
+      .get(url, {
+        headers: { key: this.apiKey },
+      })
+      .pipe(
+        catchError((error) => {
+          this.handleError(error);
+          throw new InternalServerErrorException(
+            'Failed to fetch coin history.',
+          );
+        }),
+      );
+  }
+
   private handleError(error: any): void {
     const errorMessage = error.response?.data || 'Unknown error occurred';
     this.logger.error(errorMessage);
   }
 
-  async findBestCoins(): Promise<CoinDTO[]> {
+  async findTopCoins(): Promise<CoinDTO[]> {
     // TODO: Descomentar quando for o momento de fazer a chamada para a API
     // const { data } = await firstValueFrom(this.fetchTopCoins());
     // return CoinDTO.fromDataArray(data);
@@ -64,8 +85,26 @@ export class CoinsService {
 
     return new Promise((resolve) => {
       return setTimeout(() => {
-        resolve(CoinDTO.fromDataArray(COINS_TRENDING_MOCK));
+        resolve(CoinDTO.fromDataArray(TOP_COINS_MOCK));
       }, TIMEOUT);
     });
+  }
+
+  async findCoinHistory(id: string): Promise<number[]> {
+    const { data } = await firstValueFrom(this.fetchCoinHistory(id));
+    return data.prices.map((price) => price[1]);
+  }
+
+  async findCoinById(id: string): Promise<CoinDTO> {
+    const url = this.buildUrl(`/coins/${id}`);
+
+    const { data } = await firstValueFrom(
+      this.httpService.get(url, {
+        headers: { key: this.apiKey },
+      }),
+    );
+    console.log('data', data);
+
+    return data;
   }
 }

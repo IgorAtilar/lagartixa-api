@@ -1,4 +1,4 @@
-export const COINS_TRENDING_MOCK = [
+export const TOP_COINS_MOCK = [
   {
     id: 'bitcoin',
     name: 'Bitcoin',

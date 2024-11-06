@@ -1,5 +1,5 @@
 export class CoinDTO {
-  readonly id: number;
+  readonly id: string;
   readonly symbol: string;
   readonly name: string;
   readonly image: string;
@@ -11,7 +11,7 @@ export class CoinDTO {
     this.name = data.name;
     this.symbol = data.symbol;
     this.image = data.image;
-    this.currentPrice = data.current_price;
+    this.currentPrice = data.currentPrice;
     this.sparklineIn7d = data.sparklineIn7d.price;
   }
 
