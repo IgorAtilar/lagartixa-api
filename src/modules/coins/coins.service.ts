@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { HttpService } from '@nestjs/axios';
 import {
   Injectable,
@@ -5,9 +6,12 @@ import {
   Logger,
 } from '@nestjs/common';
 import { catchError, firstValueFrom } from 'rxjs';
-import { CoinDTO } from './dto/coin.dto';
+import { TopCoinData, TopCoinDTO } from './dto/top-coin.dto';
 import { ConfigService } from '@nestjs/config';
-import { TOP_COINS_MOCK } from './mock';
+import { COIN_BY_ID_MOCK, COIN_HISTORY_MOCK, TOP_COINS_MOCK } from './mock';
+import { CoinHistoryData, CoinHistoryDTO } from './dto/coin-history.dto';
+import { CoinDetailsData, CoinDetailsDTO } from './dto/coin-details-dto';
+import { CoinData, CoinDTO } from './dto/coin.dto';
 
 @Injectable()
 export class CoinsService {
@@ -21,7 +25,6 @@ export class CoinsService {
   ) {}
 
   private buildUrl(endpoint: string, params: Record<string, any> = {}): string {
-    console.log('this.apiUrl', this.apiUrl);
     const url = new URL(`${this.apiUrl}${endpoint}`);
     Object.keys(params).forEach((key) =>
       url.searchParams.append(key, params[key]),
@@ -35,11 +38,10 @@ export class CoinsService {
       order: 'market_cap_desc',
       per_page: 10,
       page: 1,
-      sparkline: true,
     });
 
     return this.httpService
-      .get(url, {
+      .get<TopCoinData[]>(url, {
         headers: { key: this.apiKey },
       })
       .pipe(
@@ -58,7 +60,7 @@ export class CoinsService {
     });
 
     return this.httpService
-      .get(url, {
+      .get<CoinHistoryData>(url, {
         headers: { key: this.apiKey },
       })
       .pipe(
@@ -71,40 +73,87 @@ export class CoinsService {
       );
   }
 
+  private fetchCoinById(id: string) {
+    const url = this.buildUrl(`/coins/${id}`);
+
+    return this.httpService
+      .get<CoinDetailsData>(url, {
+        headers: { key: this.apiKey },
+      })
+      .pipe(
+        catchError((error) => {
+          this.handleError(error);
+          throw new InternalServerErrorException('Failed to fetch coin.');
+        }),
+      );
+  }
+
+  private fetchCoinsByIds(ids: string[]) {
+    const url = this.buildUrl('/coins/markets', {
+      ids: ids.join(','),
+      vs_currency: 'usd',
+    });
+
+    return this.httpService
+      .get<CoinData[]>(url, {
+        headers: { key: this.apiKey },
+      })
+      .pipe(
+        catchError((error) => {
+          this.handleError(error);
+          throw new InternalServerErrorException('Failed to fetch coins.');
+        }),
+      );
+  }
+
   private handleError(error: any): void {
     const errorMessage = error.response?.data || 'Unknown error occurred';
     this.logger.error(errorMessage);
   }
 
-  async findTopCoins(): Promise<CoinDTO[]> {
+  async findTopCoins(): Promise<TopCoinDTO[]> {
     // TODO: Descomentar quando for o momento de fazer a chamada para a API
     // const { data } = await firstValueFrom(this.fetchTopCoins());
     // return CoinDTO.fromDataArray(data);
 
-    const TIMEOUT = 1000;
+    const TIMEOUT = 100;
 
     return new Promise((resolve) => {
       return setTimeout(() => {
-        resolve(CoinDTO.fromDataArray(TOP_COINS_MOCK));
+        resolve(TopCoinDTO.fromDataArray(TOP_COINS_MOCK));
       }, TIMEOUT);
     });
   }
 
-  async findCoinHistory(id: string): Promise<number[]> {
-    const { data } = await firstValueFrom(this.fetchCoinHistory(id));
-    return data.prices.map((price) => price[1]);
+  async findCoinHistory(id: string): Promise<CoinHistoryDTO> {
+    // TODO: Descomentar quando for o momento de fazer a chamada para a API
+    // const { data } = await firstValueFrom(this.fetchCoinHistory(id));
+    // return CoinHistoryDTO.fromData(data);
+
+    const TIMEOUT = 100;
+
+    return new Promise((resolve) => {
+      return setTimeout(() => {
+        resolve(CoinHistoryDTO.fromData(COIN_HISTORY_MOCK));
+      }, TIMEOUT);
+    });
   }
 
-  async findCoinById(id: string): Promise<CoinDTO> {
-    const url = this.buildUrl(`/coins/${id}`);
+  async findCoinById(id: string) {
+    // TODO: Descomentar quando for o momento de fazer a chamada para a API
+    // const { data } = await firstValueFrom(this.fetchCoinById(id));
+    // return CoinDTO.fromData(data);
 
-    const { data } = await firstValueFrom(
-      this.httpService.get(url, {
-        headers: { key: this.apiKey },
-      }),
-    );
-    console.log('data', data);
+    const TIMEOUT = 100;
+    return new Promise((resolve) => {
+      return setTimeout(() => {
+        resolve(CoinDetailsDTO.fromData(COIN_BY_ID_MOCK));
+      }, TIMEOUT);
+    });
+  }
 
-    return data;
+  async findCoinsByIds(ids: string[]) {
+    const { data } = await firstValueFrom(this.fetchCoinsByIds(ids));
+    return data.map((coin) => new CoinDTO(coin));
   }
 }

@@ -4,4 +4,7 @@ export default () => ({
     url: process.env.COINS_API_URL,
     Key: process.env.COINS_API_KEY,
   },
+  jwt: {
+    secret: process.env.JWT_SECRET,
+  },
 });

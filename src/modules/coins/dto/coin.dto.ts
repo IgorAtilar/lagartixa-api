@@ -1,25 +1,60 @@
+import { IsNumber, IsString, IsUrl } from 'class-validator';
+
+export type CoinData = {
+  id: string;
+  symbol: string;
+  name: string;
+  image: string;
+  current_price: number;
+  market_cap: number;
+  market_cap_rank: number;
+  fully_diluted_valuation: number;
+  total_volume: number;
+  high_24h: number;
+  low_24h: number;
+  price_change_24h: number;
+  price_change_percentage_24h: number;
+  market_cap_change_24h: number;
+  market_cap_change_percentage_24h: number;
+  circulating_supply: number;
+  total_supply: number;
+  max_supply: number;
+  ath: number;
+  ath_change_percentage: number;
+  ath_date: string;
+  atl: number;
+  atl_change_percentage: number;
+  atl_date: string;
+  roi: null | {
+    times: number;
+    currency: string;
+    percentage: number;
+  };
+  last_updated: string;
+};
+
 export class CoinDTO {
+  @IsString()
   readonly id: string;
+
+  @IsString()
   readonly symbol: string;
+
+  @IsString()
   readonly name: string;
+
+  @IsString()
+  @IsUrl()
   readonly image: string;
+
+  @IsNumber()
   readonly currentPrice: number;
-  readonly sparklineIn7d: number[];
 
-  constructor(data: any) {
+  constructor(data: CoinData) {
     this.id = data.id;
-    this.name = data.name;
     this.symbol = data.symbol;
+    this.name = data.name;
     this.image = data.image;
-    this.currentPrice = data.currentPrice;
-    this.sparklineIn7d = data.sparklineIn7d.price;
-  }
-
-  static fromData(data: any): CoinDTO {
-    return new CoinDTO(data);
-  }
-
-  static fromDataArray(data: any[]): CoinDTO[] {
-    return data.map((coin) => CoinDTO.fromData(coin));
+    this.currentPrice = data.current_price;
   }
 }

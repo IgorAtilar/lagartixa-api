@@ -17,7 +17,12 @@ export class CoinsController {
 
   @Get(':id')
   async getCoinById(@Param('id') id: string) {
-    console.log('id', id);
     return this.coinsService.findCoinById(id);
+  }
+
+  @Get('list/:ids')
+  async getCoinsByIds(@Param('ids') ids: string) {
+    const idsArray = ids.split(',');
+    return this.coinsService.findCoinsByIds(idsArray);
   }
 }
