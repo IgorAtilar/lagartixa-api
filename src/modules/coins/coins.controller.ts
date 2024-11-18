@@ -1,7 +1,9 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, UseInterceptors } from '@nestjs/common';
 import { CoinsService } from './coins.service';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 
 @Controller('coins')
+@UseInterceptors(CacheInterceptor)
 export class CoinsController {
   constructor(private readonly coinsService: CoinsService) {}
 
@@ -24,5 +26,10 @@ export class CoinsController {
   async getCoinsByIds(@Param('ids') ids: string) {
     const idsArray = ids.split(',');
     return this.coinsService.findCoinsByIds(idsArray);
+  }
+
+  @Get('search/:query')
+  async searchCoins(@Param('query') query: string) {
+    return this.coinsService.search(query);
   }
 }

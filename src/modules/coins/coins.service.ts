@@ -12,6 +12,7 @@ import { COIN_BY_ID_MOCK, COIN_HISTORY_MOCK, TOP_COINS_MOCK } from './mock';
 import { CoinHistoryData, CoinHistoryDTO } from './dto/coin-history.dto';
 import { CoinDetailsData, CoinDetailsDTO } from './dto/coin-details-dto';
 import { CoinData, CoinDTO } from './dto/coin.dto';
+import { SearchCoinData, SearchCoinDTO } from './dto/search-coin.dto';
 
 @Injectable()
 export class CoinsService {
@@ -106,16 +107,31 @@ export class CoinsService {
       );
   }
 
+  private searchCoins(query: string) {
+    const url = this.buildUrl('/search', {
+      query,
+    });
+
+    return this.httpService
+      .get<SearchCoinData>(url, {
+        headers: { key: this.apiKey },
+      })
+      .pipe(
+        catchError((error) => {
+          this.handleError(error);
+          throw new InternalServerErrorException('Failed to search coins.');
+        }),
+      );
+  }
+
   private handleError(error: any): void {
     const errorMessage = error.response?.data || 'Unknown error occurred';
     this.logger.error(errorMessage);
   }
 
   async findTopCoins(): Promise<TopCoinDTO[]> {
-    // TODO: Descomentar quando for o momento de fazer a chamada para a API
     // const { data } = await firstValueFrom(this.fetchTopCoins());
-    // return CoinDTO.fromDataArray(data);
-
+    // return TopCoinDTO.fromDataArray(data);
     const TIMEOUT = 100;
 
     return new Promise((resolve) => {
@@ -126,10 +142,8 @@ export class CoinsService {
   }
 
   async findCoinHistory(id: string): Promise<CoinHistoryDTO> {
-    // TODO: Descomentar quando for o momento de fazer a chamada para a API
     // const { data } = await firstValueFrom(this.fetchCoinHistory(id));
     // return CoinHistoryDTO.fromData(data);
-
     const TIMEOUT = 100;
 
     return new Promise((resolve) => {
@@ -140,20 +154,17 @@ export class CoinsService {
   }
 
   async findCoinById(id: string) {
-    // TODO: Descomentar quando for o momento de fazer a chamada para a API
-    // const { data } = await firstValueFrom(this.fetchCoinById(id));
-    // return CoinDTO.fromData(data);
-
-    const TIMEOUT = 100;
-    return new Promise((resolve) => {
-      return setTimeout(() => {
-        resolve(CoinDetailsDTO.fromData(COIN_BY_ID_MOCK));
-      }, TIMEOUT);
-    });
+    const { data } = await firstValueFrom(this.fetchCoinById(id));
+    return CoinDetailsDTO.fromData(data);
   }
 
   async findCoinsByIds(ids: string[]) {
     const { data } = await firstValueFrom(this.fetchCoinsByIds(ids));
     return data.map((coin) => new CoinDTO(coin));
+  }
+
+  async search(query: string) {
+    const { data } = await firstValueFrom(this.searchCoins(query));
+    return SearchCoinDTO.fromDataArray(data.coins);
   }
 }

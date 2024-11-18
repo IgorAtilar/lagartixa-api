@@ -79,7 +79,6 @@ export class UsersService {
       throw new Error('Coin not found or does not belong to the user');
     }
 
-    console.log('amount', amount);
     const savedCoin = await this.coinsRepository.save({
       ...coin,
       amount,

@@ -37,7 +37,6 @@ export class TopCoinDTO {
   }
 
   static fromData(data: TopCoinData): TopCoinDTO {
-    console.log('data', data);
     const instance = new TopCoinDTO(data);
 
     const validationErrors = validateSync(instance);

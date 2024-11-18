@@ -57,4 +57,8 @@ export class CoinDTO {
     this.image = data.image;
     this.currentPrice = data.current_price;
   }
+
+  static fromData(data: CoinData): CoinDTO {
+    return new CoinDTO(data);
+  }
 }
