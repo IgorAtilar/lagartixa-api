@@ -7,9 +7,15 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { User } from './users/user.entity';
 import { UserCoin } from './users/user-coin.entity';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
+    CacheModule.register({
+      ttl: 3 * 60000,
+      max: 10,
+      isGlobal: true, // Global configuration
+    }),
     TypeOrmModule.forRoot({
       database: 'lagartixa.db',
       synchronize: true,

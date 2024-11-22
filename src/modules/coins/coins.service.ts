@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { HttpService } from '@nestjs/axios';
 import {
   Injectable,
@@ -8,7 +7,6 @@ import {
 import { catchError, firstValueFrom } from 'rxjs';
 import { TopCoinData, TopCoinDTO } from './dto/top-coin.dto';
 import { ConfigService } from '@nestjs/config';
-import { COIN_BY_ID_MOCK, COIN_HISTORY_MOCK, TOP_COINS_MOCK } from './mock';
 import { CoinHistoryData, CoinHistoryDTO } from './dto/coin-history.dto';
 import { CoinDetailsData, CoinDetailsDTO } from './dto/coin-details-dto';
 import { CoinData, CoinDTO } from './dto/coin.dto';
@@ -59,6 +57,8 @@ export class CoinsService {
       interval: 'daily',
       vs_currency: 'usd',
     });
+
+    console.log('url', url);
 
     return this.httpService
       .get<CoinHistoryData>(url, {
@@ -130,27 +130,13 @@ export class CoinsService {
   }
 
   async findTopCoins(): Promise<TopCoinDTO[]> {
-    // const { data } = await firstValueFrom(this.fetchTopCoins());
-    // return TopCoinDTO.fromDataArray(data);
-    const TIMEOUT = 100;
-
-    return new Promise((resolve) => {
-      return setTimeout(() => {
-        resolve(TopCoinDTO.fromDataArray(TOP_COINS_MOCK));
-      }, TIMEOUT);
-    });
+    const { data } = await firstValueFrom(this.fetchTopCoins());
+    return TopCoinDTO.fromDataArray(data);
   }
 
   async findCoinHistory(id: string): Promise<CoinHistoryDTO> {
-    // const { data } = await firstValueFrom(this.fetchCoinHistory(id));
-    // return CoinHistoryDTO.fromData(data);
-    const TIMEOUT = 100;
-
-    return new Promise((resolve) => {
-      return setTimeout(() => {
-        resolve(CoinHistoryDTO.fromData(COIN_HISTORY_MOCK));
-      }, TIMEOUT);
-    });
+    const { data } = await firstValueFrom(this.fetchCoinHistory(id));
+    return CoinHistoryDTO.fromData(data);
   }
 
   async findCoinById(id: string) {
